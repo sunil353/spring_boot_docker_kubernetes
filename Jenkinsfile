@@ -11,12 +11,6 @@ pipeline{
 	
 	stages{
 		
-		stage('check out code from git'){
-			steps{
-				git 'https://github.com/sunil353/spring_boot_docker_kubernetes.git'
-			}
-		}
-		
 		stage('build spring boot docker kubernetes app'){
 			steps{
 				sh 'mvn clean install'
