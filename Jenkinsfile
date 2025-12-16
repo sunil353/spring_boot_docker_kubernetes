@@ -36,14 +36,18 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                    kubectl get nodes
-                    kubectl apply -f deployment_service.yaml
-                    kubectl get pods
-                    kubectl get svc
-                '''
-            }
-        }
+	    steps {
+	        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+	            sh '''
+	                kubectl get nodes
+	                kubectl apply -f deployment_service.yaml
+	                kubectl rollout status deployment/springboot-app
+	                kubectl get pods
+	                kubectl get svc
+	            '''
+	           }  
+		    }
+	    }
+
     }
 }
