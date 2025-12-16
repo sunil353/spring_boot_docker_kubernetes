@@ -4,6 +4,6 @@ EXPOSE 8080
 
 ADD ./target/springboot-docker-kubernetes.jar /springboot-docker-kubernetes.jar
 
-CMD [ "java", "-jar", "springboot-docker-kubernetes.jar" ]
+CMD [ "java", "-jar", "/springboot-docker-kubernetes.jar" ]
 
 
