@@ -20,31 +20,30 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ${DOCKER_IMAGE}:latest .'
+                sh 'docker build --platform linux/amd64 -t ${DOCKER_IMAGE}:latest .'
             }
         }
-        
-        stage('push docker image to docker hub'){
-			steps{
-				script {
-                    withCredentials([string(credentialsId: 'dockerhub-pwdd', variable: 'dockerhubpwd')]) {
-                        sh '''
-                            echo $dockerhubpwd | docker login -u skumarmeher --password-stdin
-                            docker push skumarmeher/springboot-docker-kubernetes
-                        '''
-                        }
-                        sh 'docker push skumarmeher/springboot-docker-kubernetes'
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'dockerhub-pwdd', variable: 'dockerhubpwd')]) {
+                    sh '''
+                        echo $dockerhubpwd | docker login -u skumarmeher --password-stdin
+                        docker push ${DOCKER_IMAGE}:latest
+                    '''
                 }
-			}
-		}
-		
-		stage('Deploy to Kubernetes'){
-			
-			steps{
-				sh '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    kubectl get nodes
                     kubectl apply -f deployment_service.yaml
-                   '''
-			}
-		}
+                    kubectl get pods
+                    kubectl get svc
+                '''
+            }
+        }
     }
 }
