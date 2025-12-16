@@ -23,5 +23,19 @@ pipeline {
                 sh 'docker build -t ${DOCKER_IMAGE}:latest .'
             }
         }
+        
+        stage('push docker image to docker hub'){
+			steps{
+				script {
+                    withCredentials([string(credentialsId: 'dockerhub-pwdd', variable: 'dockerhubpwd')]) {
+                        sh '''
+                            echo $dockerhubpwd | docker login -u skumarmeher --password-stdin
+                            docker push skumarmeher/springboot-docker-kubernetes
+                        '''
+                        }
+                        sh 'docker push skumarmeher/springboot-docker-kubernetes'
+                }
+			}
+		}
     }
 }
