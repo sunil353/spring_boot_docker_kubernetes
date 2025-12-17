@@ -36,11 +36,14 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh '''
                         echo "Using kubeconfig: $KUBECONFIG"
+                        kubectl version --client
                         kubectl get nodes
-                        kubectl apply -f deployment_service.yaml
+                        # Apply your Kubernetes manifests
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
                     '''
                 }
             }
