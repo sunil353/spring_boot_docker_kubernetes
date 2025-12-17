@@ -39,11 +39,9 @@ pipeline {
 	    steps {
 	        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
 	            sh '''
-	                kubectl get nodes
+	            	echo "Using kubeconfig: $KUBECONFIG"
+	            	kubectl get nodes
 	                kubectl apply -f deployment_service.yaml
-	                kubectl rollout status deployment/springboot-app
-	                kubectl get pods
-	                kubectl get svc
 	            '''
 	           }  
 		    }
