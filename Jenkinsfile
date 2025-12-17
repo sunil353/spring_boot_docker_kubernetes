@@ -11,10 +11,9 @@ pipeline {
 
     stages {
 
-        stage('Build Spring Boot App') {
+        stage('Build App') {
             steps {
                 sh 'mvn clean package'
-                sh 'ls -lh target'
             }
         }
 
@@ -24,7 +23,7 @@ pipeline {
             }
         }
 
-        stage('Push Docker Image to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
                 withCredentials([string(credentialsId: 'dockerhub-pwdd', variable: 'dockerhubpwd')]) {
                     sh '''
@@ -36,16 +35,15 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-	    steps {
-	        withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
-	            sh '''
-	            	echo "Using jenkins-kubeconfig : $KUBECONFIG"
-	            	kubectl get nodes
-	                kubectl apply -f deployment_service.yaml
-	            '''
-	           }  
-		    }
-	    }
-
+            steps {
+                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh '''
+                        echo "Using kubeconfig: $KUBECONFIG"
+                        kubectl get nodes
+                        kubectl apply -f deployment_service.yaml
+                    '''
+                }
+            }
+        }
     }
 }
