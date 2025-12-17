@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "skumarmeher/springboot-docker-kubernetes"
+        IMAGE_TAG    = "${BUILD_NUMBER}"
     }
 
     tools {
@@ -19,7 +20,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE}:latest ."
+                sh "docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} ."
             }
         }
 
@@ -28,24 +29,29 @@ pipeline {
                 withCredentials([string(credentialsId: 'dockerhub-pwdd', variable: 'dockerhubpwd')]) {
                     sh '''
                         echo $dockerhubpwd | docker login -u skumarmeher --password-stdin
-                        docker push ${DOCKER_IMAGE}:latest
+                        docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
                     '''
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
-            steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                        echo "Using kubeconfig: $KUBECONFIG"
-                        kubectl version --client
-                        kubectl get nodes
-                        # Apply your Kubernetes manifests
-                        kubectl apply -f deployment_service.yaml
-                    '''
-                }
-            }
-        }
+		    steps {
+		        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+		            sh '''
+		              echo "Deploying to Kubernetes..."
+		
+		              # Replace image version
+		
+		              kubectl apply -f deployment.yaml
+		              kubectl apply -f service.yaml
+		
+		              # WAIT until app is really running
+		              kubectl rollout status deployment/springboot-deployment
+		            '''
+		        }
+    		}
+		}
+
     }
 }
