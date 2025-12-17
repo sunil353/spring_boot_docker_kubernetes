@@ -43,7 +43,6 @@ pipeline {
                         kubectl get nodes
                         # Apply your Kubernetes manifests
                         kubectl apply -f deployment_service.yaml
-                        kubectl apply -f jenkins-kubeconfig.yaml
                     '''
                 }
             }
