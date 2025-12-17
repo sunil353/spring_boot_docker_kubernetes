@@ -37,9 +37,9 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
 	    steps {
-	        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+	        withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG')]) {
 	            sh '''
-	            	echo "Using kubeconfig: $KUBECONFIG"
+	            	echo "Using jenkins-kubeconfig : $KUBECONFIG"
 	            	kubectl get nodes
 	                kubectl apply -f deployment_service.yaml
 	            '''
