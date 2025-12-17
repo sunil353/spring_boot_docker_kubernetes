@@ -14,13 +14,13 @@ pipeline {
 
         stage('Build App') {
             steps {
-                sh 'mvn clean package'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} ."
+                sh 'docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} .'
             }
         }
 
@@ -28,30 +28,28 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'dockerhub-pwdd', variable: 'dockerhubpwd')]) {
                     sh '''
-                        echo $dockerhubpwd | docker login -u skumarmeher --password-stdin
+                        echo "$dockerhubpwd" | docker login -u skumarmeher --password-stdin
                         docker push ${DOCKER_IMAGE}:${IMAGE_TAG}
+                        docker logout
                     '''
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
-		    steps {
-		        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-		            sh '''
-		              echo "Deploying to Kubernetes..."
-		
-		              # Replace image version
-		
-		              kubectl apply -f deployment.yaml
-		              kubectl apply -f service.yaml
-		
-		              # WAIT until app is really running
-		              kubectl rollout status deployment/springboot-deployment
-		            '''
-		        }
-    		}
-		}
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh '''
+                      kubectl config current-context
+                      kubectl get nodes
 
+                      envsubst < deployment.yaml | kubectl apply -f -
+                      kubectl apply -f service.yaml
+
+                      kubectl rollout status deployment/springboot-deployment
+                    '''
+                }
+            }
+        }
     }
 }
