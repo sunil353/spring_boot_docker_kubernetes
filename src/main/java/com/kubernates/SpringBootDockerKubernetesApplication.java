@@ -11,7 +11,7 @@ public class SpringBootDockerKubernetesApplication {
 	
 	@GetMapping("/welcome")
 	public String greetings() {
-		return "Welcome to spring boot application project and deploy into the kubernetes by help of Jenkins Pipeline.... !";
+		return "Welcome to spring boot project and deploy into the kubernetes by help of Jenkins Pipeline.... !";
 	}
 	
 
